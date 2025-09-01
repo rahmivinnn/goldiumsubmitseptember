@@ -64,7 +64,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   const energyParticles = Array.from({ length: 10 }, (_, i) => (
     <motion.div
       key={`energy-${i}`}
-      className="absolute w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"
+      className="absolute w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
       initial={{ 
         x: Math.random() * 400 - 200,
         y: Math.random() * 400 - 200,
@@ -129,7 +129,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
             {animationPhase === 'enter' && Array.from({ length: 15 }, (_, i) => (
               <motion.div
                 key={`energy-${i}`}
-                className="absolute w-3 h-3 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 rounded-full shadow-lg"
+                className="absolute w-3 h-3 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 rounded-full shadow-lg"
                 initial={{ 
                   x: Math.random() * 400 - 200,
                   y: Math.random() * 400 - 200,

@@ -5,7 +5,8 @@ import { motion } from "framer-motion"
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, Users, Activity, Zap, Target, Settings, Bell } from "lucide-react"
 import PageLayout from "@/components/PageLayout"
 import RealTimeMarketData from "@/components/market/RealTimeMarketData"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import SolanaDashboard from "@/components/SolanaDashboard"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -121,8 +122,9 @@ export default function DashboardPage() {
 
             {/* Main Content */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="solana">Solana DeFi</TabsTrigger>
                 <TabsTrigger value="positions">Positions</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -171,6 +173,10 @@ export default function DashboardPage() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="solana" className="mt-6">
+                <SolanaDashboard wallet={publicKey ? { publicKey } : null} />
               </TabsContent>
               
               <TabsContent value="positions" className="mt-6">
