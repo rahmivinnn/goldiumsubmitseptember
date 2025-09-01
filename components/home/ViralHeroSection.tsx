@@ -38,7 +38,7 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { useRouter } from 'next/navigation'
-import ConnectWalletModal from '@/components/ConnectWalletModal'
+import WalletDisplay from '@/components/WalletDisplay'
 
 // Three.js Background Component
 const Background3D = () => {
@@ -71,7 +71,7 @@ export default function ViralHeroSection() {
   const [playersOnline, setPlayersOnline] = useState(12500)
   const [gamesPlayed, setGamesPlayed] = useState(850000)
   const [tokensEarned, setTokensEarned] = useState(1000000)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+
   const { connected, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
   const router = useRouter()
@@ -492,11 +492,7 @@ export default function ViralHeroSection() {
         </div>
       </div>
 
-      {/* Connect Wallet Modal */}
-      <ConnectWalletModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+
     </section>
   )
 }

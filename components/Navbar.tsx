@@ -6,7 +6,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 // import DeFiMenu from "@/components/DeFiMenu" // Removed dropdown, using direct link
-import ConnectWalletButton from "@/components/ConnectWalletButton"
+import WalletDisplay from "@/components/WalletDisplay"
 import NetworkBadge from "@/components/NetworkBadge"
 import { safeAddScrollListener, isBrowser } from "@/utils/browser"
 import "@/styles/navbar-performance.css"
@@ -134,7 +134,7 @@ function Navbar() {
           {/* Right Side - Wallet & Network */}
           <div className="hidden md:flex items-center gap-4">
             <NetworkBadge />
-            <ConnectWalletButton />
+            <WalletDisplay showFullDetails={false} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -208,7 +208,7 @@ function Navbar() {
             </nav>
             <div className="mt-6 flex flex-col gap-4">
               <NetworkBadge />
-              <ConnectWalletButton />
+              <WalletDisplay showFullDetails={false} />
             </div>
           </div>
         </motion.div>

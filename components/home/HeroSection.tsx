@@ -6,8 +6,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { useWallet } from "@/components/providers/WalletContextProvider"
-import ConnectWalletModal from "@/components/ConnectWalletModal"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { useWalletModal } from "@solana/wallet-adapter-react-ui"
+import WalletDisplay from "@/components/WalletDisplay"
 import { Loader2, Wallet, ArrowRight, Zap } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import dynamic from "next/dynamic"
@@ -20,8 +21,8 @@ const ThreeScene = dynamic(() => import("@/components/three/ThreeScene"), {
 })
 
 export default function HeroSection() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const { status, address, claimTestTokens, stakeTokens, isProcessing } = useWallet()
+  const { connected, connecting, publicKey } = useWallet()
+  const { setVisible } = useWalletModal()
   const { toast } = useToast()
   const [scrollY, setScrollY] = useState(0)
   const isMounted = useRef(false)
@@ -62,13 +63,18 @@ export default function HeroSection() {
   }, []) // Empty dependency array means this only runs once on mount
 
   const handleClaimTokens = async () => {
-    if (status !== "connected") {
-      setIsModalOpen(true)
+    if (!connected) {
+      setVisible(true)
       return
     }
 
-    const result = await claimTestTokens()
-    if (!result) {
+    try {
+      // Implement token claiming logic here
+      toast({
+        title: "Feature Coming Soon",
+        description: "Token claiming will be available soon!",
+      })
+    } catch (error) {
       toast({
         title: "Claim Failed",
         description: "Failed to claim test tokens. Please try again.",
@@ -78,13 +84,18 @@ export default function HeroSection() {
   }
 
   const handleStakeTokens = async () => {
-    if (status !== "connected") {
-      setIsModalOpen(true)
+    if (!connected) {
+      setVisible(true)
       return
     }
 
-    const result = await stakeTokens(10)
-    if (!result) {
+    try {
+      // Implement staking logic here
+      toast({
+        title: "Feature Coming Soon",
+        description: "Token staking will be available soon!",
+      })
+    } catch (error) {
       toast({
         title: "Staking Failed",
         description: "Failed to stake tokens. Please try again.",
@@ -94,10 +105,10 @@ export default function HeroSection() {
   }
 
   const handleGetStarted = () => {
-    if (status === "connected") {
+    if (connected) {
       router.push('/dashboard')
     } else {
-      setIsModalOpen(true)
+      setVisible(true)
     }
   }
 
@@ -152,14 +163,14 @@ export default function HeroSection() {
               onClick={handleGetStarted}
               className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-medium text-lg py-6 px-8 group"
               size="lg"
-              disabled={status === "connecting"}
+              disabled={connecting}
             >
-              {status === "connecting" ? (
+              {connecting ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Connecting...
                 </>
-              ) : status === "connected" ? (
+              ) : connected ? (
                 <>
                   <ArrowRight className="mr-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   Enter Dashboard
@@ -236,10 +247,20 @@ export default function HeroSection() {
             </div>
           </div>
         </motion.div>
+
+        {/* Wallet Display for connected users */}
+        {connected && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="mt-8 flex justify-center"
+          >
+            <WalletDisplay showFullDetails={false} />
+          </motion.div>
+        )}
       </div>
 
-      {/* Connect Wallet Modal */}
-      <ConnectWalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   )
 }

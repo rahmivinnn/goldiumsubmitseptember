@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/providers/WalletContextProvider"
 import { useLanguage } from "@/components/providers/WalletContextProvider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
-import { ConnectWalletButton } from "@/components/ConnectWalletButton"
+import WalletDisplay from "@/components/WalletDisplay"
 
 const tabs = [
   { name: "swap", href: "/", current: true },
@@ -25,7 +25,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
-  // Removed useWalletBalance - now using ConnectWalletButton with real balance
+  // Now using WalletDisplay with real balance
 
   // Memoized theme toggle function
   const toggleTheme = useCallback(() => {
@@ -47,7 +47,7 @@ export default function Header() {
     setLanguage(lang)
   }, [setLanguage])
 
-  // Removed unused wallet-related functions - now handled by ConnectWalletButton
+  // Wallet functionality now handled by WalletDisplay component
 
   // Apply theme class to body
   useEffect(() => {
@@ -134,12 +134,10 @@ export default function Header() {
               </Button>
             </div>
 
-            {/* Wallet Section - Using new ConnectWalletButton with real balance */}
-            <ConnectWalletButton 
+            {/* Wallet Section - Using new WalletDisplay with real balance */}
+            <WalletDisplay 
               className=""
-              variant="default"
-              size="default"
-              showBalance={true}
+              showFullDetails={true}
             />
 
             {/* Mobile menu button */}
