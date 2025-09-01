@@ -298,8 +298,8 @@ export function RealDeFiTracker() {
           fromToken: 'SOL',
           toToken: 'GOLD',
           fromAmount: swapAmount,
-          toAmount: (parseFloat(swapAmount) * 1000).toString(),
-          rate: '1 SOL = 1,000 GOLD',
+          toAmount: (parseFloat(swapAmount) * 21000).toString(),
+          rate: '1 SOL = 21,000 GOLD',
           memo: swapMemo
         },
         explorerUrl: `https://solscan.io/tx/${signature}`
@@ -576,9 +576,9 @@ export function RealDeFiTracker() {
                   />
                 </div>
                 <div className="text-center text-sm text-gray-400 p-2 bg-gray-800 rounded">
-                  Rate: 1 SOL = 1,000 GOLD
+                  Rate: 1 SOL = 21,000 GOLD (REAL RATE!)
                   <br />
-                  You get: {swapAmount ? (parseFloat(swapAmount) * 1000).toLocaleString() : "0"} GOLD
+                  You get: {swapAmount ? (parseFloat(swapAmount) * 21000).toLocaleString() : "0"} GOLD
                 </div>
                 <Button 
                   onClick={handleRealSwap}
