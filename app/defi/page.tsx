@@ -2,7 +2,7 @@
 
 import PageLayout from '@/components/PageLayout'
 import SwapCard from '@/components/SwapCard'
-import TokenTransfer from '@/components/TokenTransfer'
+// TokenTransfer removed - using RealDeFiTracker instead
 import StakingInterface from '@/components/StakingInterface'
 import LiquidityPoolsList from '@/components/LiquidityPoolsList'
 import WorkingDeFiActions from '@/components/WorkingDeFiActions'
@@ -311,7 +311,10 @@ export default function DeFiPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <TokenTransfer />
+                <div className="text-center py-8">
+                  <p className="text-gray-400 mb-4">Use the Real DeFi Tracker above for transfers</p>
+                  <p className="text-sm text-gray-500">All transactions are real and trackable on blockchain</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
