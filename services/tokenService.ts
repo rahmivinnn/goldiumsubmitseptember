@@ -142,8 +142,7 @@ export async function mintGoldTokens(
     const randomPart = Math.random().toString(36).substring(2, 15)
     const realSignature = `${timestamp}${randomPart}GOLD${GOLD_MINT_ADDRESS[network]}mint${Math.random().toString(36).substring(2, 10)}`
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Removed artificial delay for better responsiveness
 
     return realSignature
   } catch (error) {
@@ -172,8 +171,7 @@ export async function burnGoldTokens(
     const randomPart = Math.random().toString(36).substring(2, 15)
     const realSignature = `${timestamp}${randomPart}GOLD${GOLD_MINT_ADDRESS[network]}burn${Math.random().toString(36).substring(2, 10)}`
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Removed artificial delay for better responsiveness
 
     return realSignature
   } catch (error) {

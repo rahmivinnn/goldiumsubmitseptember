@@ -1,0 +1,88 @@
+/* Instant Wallet Button Optimizations */
+
+.instant-wallet-button {
+  /* Remove all delays */
+  transition-delay: 0ms !important;
+  animation-delay: 0ms !important;
+  
+  /* Ultra-fast transitions */
+  transition: all 75ms ease-out !important;
+  
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform, background-color;
+  backface-visibility: hidden;
+  
+  /* Immediate response */
+  pointer-events: auto;
+  cursor: pointer;
+  
+  /* Prevent any layout shifts */
+  contain: layout style;
+}
+
+.instant-wallet-button:hover {
+  transform: translateZ(0) scale(1.02);
+  transition: all 50ms ease-out !important;
+}
+
+.instant-wallet-button:active {
+  transform: translateZ(0) scale(0.98);
+  transition: all 25ms ease-out !important;
+}
+
+/* Remove any potential blocking */
+.instant-wallet-button * {
+  pointer-events: none;
+  transition-delay: 0ms !important;
+}
+
+/* Ensure modal shows instantly */
+.wallet-adapter-modal-wrapper {
+  transition: opacity 100ms ease-out !important;
+  animation-delay: 0ms !important;
+}
+
+.wallet-adapter-modal {
+  transition: all 100ms ease-out !important;
+  animation-delay: 0ms !important;
+}
+
+/* Optimize wallet adapter buttons */
+.wallet-adapter-button {
+  transition: all 75ms ease-out !important;
+  transition-delay: 0ms !important;
+}
+
+.wallet-adapter-button:hover {
+  transform: scale(1.02);
+  transition: all 50ms ease-out !important;
+}
+
+.wallet-adapter-button:active {
+  transform: scale(0.98);
+  transition: all 25ms ease-out !important;
+}
+
+/* Remove any artificial delays from Solana components */
+.wallet-adapter-modal-container * {
+  transition-delay: 0ms !important;
+  animation-delay: 0ms !important;
+}
+
+/* Ensure immediate visibility */
+.wallet-adapter-modal-overlay {
+  transition: opacity 75ms ease-out !important;
+}
+
+/* Critical performance optimizations */
+.instant-response {
+  contain: strict;
+  transform: translateZ(0);
+  will-change: auto;
+  backface-visibility: hidden;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}

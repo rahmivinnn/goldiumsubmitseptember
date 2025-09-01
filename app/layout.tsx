@@ -4,6 +4,7 @@ import { Inter, Sora } from "next/font/google"
 import "./globals.css"
 import "@solana/wallet-adapter-react-ui/styles.css"
 import "../styles/wallet-modal.css"
+import "../styles/instant-wallet.css"
 import ClientProviders from "@/components/ClientProviders"
 import ClientInitializer from "@/components/ClientInitializer"
 

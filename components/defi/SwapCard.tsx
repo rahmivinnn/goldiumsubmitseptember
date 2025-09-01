@@ -169,8 +169,7 @@ export default function SwapCard() {
             })
             
             try {
-              // Simulate swap transaction - in real implementation, this would call actual swap service
-              await delay(1500)
+              // Simulate swap transaction - removed delay for better UX
               
               // Generate real transaction signature for GOLDIUM swap
               const timestamp = Date.now().toString(36)

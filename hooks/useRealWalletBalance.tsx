@@ -71,7 +71,7 @@ export function useRealWalletBalance() {
           const solBalanceInLamports = await Promise.race([
             fallbackRPCs[i].getBalance(publicKey, 'confirmed'),
             new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('SOL balance fetch timeout')), 8000)
+              setTimeout(() => reject(new Error('SOL balance fetch timeout')), 3000)
             )
           ])
           solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
@@ -126,7 +126,7 @@ export function useRealWalletBalance() {
               accountInfo = await Promise.race([
                 fallbackRPCs[i].getAccountInfo(associatedTokenAccount, 'confirmed'),
                 new Promise<null>((_, reject) => 
-                  setTimeout(() => reject(new Error('Token account fetch timeout')), 5000)
+                  setTimeout(() => reject(new Error('Token account fetch timeout')), 2000)
                 )
               ])
               break // Success, exit loop

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useWalletModal } from "@solana/wallet-adapter-react-ui"
-import WalletDisplay from "@/components/WalletDisplay"
+import SuperFastWalletButton from "@/components/SuperFastWalletButton"
 import { Loader2, Wallet, ArrowRight, Zap } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import dynamic from "next/dynamic"
@@ -108,6 +108,7 @@ export default function HeroSection() {
     if (connected) {
       router.push('/dashboard')
     } else {
+      // Ultra-fast modal open - no delays
       setVisible(true)
     }
   }
