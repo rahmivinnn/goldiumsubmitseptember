@@ -260,7 +260,7 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
   return (
     <WalletContext.Provider value={value}>
       <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect={false}>
+        <WalletProvider wallets={wallets} autoConnect={true}>
           <WalletModalProvider>{children}</WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>

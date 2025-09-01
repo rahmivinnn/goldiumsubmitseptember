@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/providers/WalletContextProvider"
 import { useLanguage } from "@/components/providers/WalletContextProvider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
-import WalletDisplay from "@/components/WalletDisplay"
+import WorkingWalletButton from "@/components/WorkingWalletButton"
 
 const tabs = [
   { name: "swap", href: "/", current: true },
@@ -134,10 +134,10 @@ export default function Header() {
               </Button>
             </div>
 
-            {/* Wallet Section - Using new WalletDisplay with real balance */}
-            <WalletDisplay 
+            {/* Wallet Section - Using WorkingWalletButton with real balance */}
+            <WorkingWalletButton 
               className=""
-              showFullDetails={true}
+              showBalance={true}
             />
 
             {/* Mobile menu button */}

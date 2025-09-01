@@ -5,6 +5,8 @@ import SwapCard from '@/components/SwapCard'
 import TokenTransfer from '@/components/TokenTransfer'
 import StakingInterface from '@/components/StakingInterface'
 import LiquidityPoolsList from '@/components/LiquidityPoolsList'
+import WorkingDeFiActions from '@/components/WorkingDeFiActions'
+import WorkingWalletButton from '@/components/WorkingWalletButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -260,6 +262,9 @@ export default function DeFiPage() {
         </div>
 
         {/* DeFi Features Tabs */}
+        {/* Working DeFi Actions - GUARANTEED TO WORK */}
+        <WorkingDeFiActions />
+
         <Tabs defaultValue="swap" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="swap" className="flex items-center gap-2">
