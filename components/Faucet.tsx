@@ -102,3 +102,6 @@ export default function Faucet() {
     </Card>
   )
 }
+
+export { Faucet }
+export default Faucet

@@ -182,3 +182,26 @@ export async function getLiquidityPools(mintAddress?: string) {
   
   return pools
 }
+
+// Export missing function for TokenChart
+export async function getTokenPriceHistory(tokenSymbol: string, days: number = 7) {
+  // Mock price history data
+  const mockData = []
+  const basePrice = tokenSymbol === 'SOL' ? 100 : 0.1
+  
+  for (let i = days; i >= 0; i--) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    
+    const randomVariation = (Math.random() - 0.5) * 0.1 // ±5% variation
+    const price = basePrice * (1 + randomVariation)
+    
+    mockData.push({
+      timestamp: date.toISOString(),
+      price: price,
+      volume: Math.random() * 1000000
+    })
+  }
+  
+  return mockData
+}

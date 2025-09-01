@@ -79,3 +79,51 @@ export function createSafeErrorHandler(
     }
   }
 }
+
+// Export missing types and functions
+export enum ErrorSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+export enum ErrorCategory {
+  WALLET = 'wallet',
+  NETWORK = 'network',
+  TRANSACTION = 'transaction',
+  UI = 'ui',
+  UNKNOWN = 'unknown'
+}
+
+// Error logs storage
+const errorLogs: any[] = []
+
+export function logError(
+  component: string,
+  action: string,
+  error: Error,
+  severity: ErrorSeverity = ErrorSeverity.MEDIUM,
+  category: ErrorCategory = ErrorCategory.UNKNOWN
+) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    component,
+    action,
+    error: error.message,
+    severity,
+    category,
+    stack: error.stack
+  }
+  
+  errorLogs.push(logEntry)
+  console.error(`[${severity.toUpperCase()}] ${category.toUpperCase()} Error in ${component} during ${action}:`, error.message)
+}
+
+export function getErrorLogs() {
+  return [...errorLogs]
+}
+
+export function clearErrorLogs() {
+  errorLogs.length = 0
+}

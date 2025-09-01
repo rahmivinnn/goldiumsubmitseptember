@@ -646,3 +646,6 @@ export default function TokenTransfer() {
     </motion.div>
   )
 }
+
+export { TokenTransfer }
+export default TokenTransfer
