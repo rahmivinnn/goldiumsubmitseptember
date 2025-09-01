@@ -41,8 +41,8 @@ function Navbar() {
   const navItems = React.useMemo(() => [
     { name: "Trading", href: "/trading", eggImage: "/K2.png" },
     { name: "Marketplace", href: "/marketplace", eggImage: "/K3.png" },
-    { name: "DeFi", href: "#defi-section", eggImage: "/K4.png" },
-    { name: "Governance", href: "/governance", eggImage: "/K5.png" },
+    { name: "DeFi", href: "/defi", eggImage: "/K4.png" },
+    { name: "Tracking", href: "/tracking", eggImage: "/K5.png" },
     { name: "Transactions", href: "/transactions", eggImage: "/K6.png" },
     { name: "Avatar", href: "/avatar", eggImage: "/K7.png" },
     { name: "Contracts", href: "/contracts", eggImage: "/K8.png" },

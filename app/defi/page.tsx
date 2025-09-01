@@ -7,6 +7,7 @@ import StakingInterface from '@/components/StakingInterface'
 import LiquidityPoolsList from '@/components/LiquidityPoolsList'
 import WorkingDeFiActions from '@/components/WorkingDeFiActions'
 import WorkingWalletButton from '@/components/WorkingWalletButton'
+import RealDeFiTracker from '@/components/RealDeFiTracker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -262,8 +263,8 @@ export default function DeFiPage() {
         </div>
 
         {/* DeFi Features Tabs */}
-        {/* Working DeFi Actions - GUARANTEED TO WORK */}
-        <WorkingDeFiActions />
+        {/* REAL DeFi Tracker - TRACKABLE ON BLOCKCHAIN */}
+        <RealDeFiTracker />
 
         <Tabs defaultValue="swap" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
