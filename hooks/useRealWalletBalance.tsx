@@ -53,48 +53,73 @@ export function useRealWalletBalance() {
     setBalance(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      // Fetch SOL balance
+      // Fetch SOL balance with timeout and retry logic
       console.log("💰 Fetching SOL balance...")
-      const solBalanceInLamports = await connection.getBalance(publicKey, 'confirmed')
-      const solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
-      console.log("✅ SOL Balance:", solBalance)
+      let solBalance = 0
+      
+      try {
+        const solBalanceInLamports = await Promise.race([
+          connection.getBalance(publicKey, 'confirmed'),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('SOL balance fetch timeout')), 10000)
+          )
+        ])
+        solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
+        console.log("✅ SOL Balance:", solBalance)
+      } catch (solError) {
+        console.log("⚠️ SOL balance fetch failed, trying with 'processed' commitment:", solError)
+        try {
+          const solBalanceInLamports = await connection.getBalance(publicKey, 'processed')
+          solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
+          console.log("✅ SOL Balance (processed):", solBalance)
+        } catch (fallbackError) {
+          console.error("❌ SOL balance fetch failed completely:", fallbackError)
+          throw new Error("Failed to fetch SOL balance")
+        }
+      }
 
-      // Fetch GOLD balance
+      // Fetch GOLD balance with better error handling
       console.log("🥇 Fetching GOLD balance...")
       let goldBalance = 0
       try {
         // Validate GOLD mint address first
         if (!GOLD_MINT_ADDRESS || GOLD_MINT_ADDRESS.length < 32) {
           console.log("⚠️ Invalid GOLD mint address:", GOLD_MINT_ADDRESS)
-          throw new Error("Invalid GOLD mint address")
-        }
-
-        const goldMint = new PublicKey(GOLD_MINT_ADDRESS)
-        console.log("🔍 GOLD Mint:", goldMint.toString())
-        
-        const associatedTokenAccount = await getAssociatedTokenAddress(
-          goldMint, 
-          publicKey,
-          false, // allowOwnerOffCurve
-          undefined, // programId
-          undefined // associatedTokenProgramId
-        )
-        console.log("🔍 Associated Token Account:", associatedTokenAccount.toString())
-        
-        // Check if the account exists
-        const accountInfo = await connection.getAccountInfo(associatedTokenAccount, 'confirmed')
-        if (accountInfo && accountInfo.data.length > 0) {
-          try {
-            const account = await getAccount(connection, associatedTokenAccount)
-            goldBalance = Number(account.amount) / Math.pow(10, 9) // GOLD has 9 decimals
-            console.log("✅ GOLD Balance:", goldBalance)
-          } catch (parseError) {
-            console.log("⚠️ Failed to parse token account:", parseError)
+          goldBalance = 0
+        } else {
+          const goldMint = new PublicKey(GOLD_MINT_ADDRESS)
+          console.log("🔍 GOLD Mint:", goldMint.toString())
+          
+          const associatedTokenAccount = await getAssociatedTokenAddress(
+            goldMint, 
+            publicKey,
+            false, // allowOwnerOffCurve
+            undefined, // programId
+            undefined // associatedTokenProgramId
+          )
+          console.log("🔍 Associated Token Account:", associatedTokenAccount.toString())
+          
+          // Check if the account exists with timeout
+          const accountInfo = await Promise.race([
+            connection.getAccountInfo(associatedTokenAccount, 'confirmed'),
+            new Promise<null>((_, reject) => 
+              setTimeout(() => reject(new Error('Token account fetch timeout')), 5000)
+            )
+          ])
+          
+          if (accountInfo && accountInfo.data.length > 0) {
+            try {
+              const account = await getAccount(connection, associatedTokenAccount)
+              goldBalance = Number(account.amount) / Math.pow(10, 9) // GOLD has 9 decimals
+              console.log("✅ GOLD Balance:", goldBalance)
+            } catch (parseError) {
+              console.log("⚠️ Failed to parse token account:", parseError)
+              goldBalance = 0
+            }
+          } else {
+            console.log("ℹ️ No GOLD token account found or account is empty")
             goldBalance = 0
           }
-        } else {
-          console.log("ℹ️ No GOLD token account found or account is empty")
-          goldBalance = 0
         }
       } catch (goldError: any) {
         console.log("⚠️ GOLD balance fetch failed:", goldError?.message || goldError)
@@ -121,11 +146,14 @@ export function useRealWalletBalance() {
         error: errorMessage
       }))
 
-      toast({
-        title: "Error fetching balance",
-        description: errorMessage,
-        variant: "destructive"
-      })
+      // Only show toast for critical errors, not for token balance issues
+      if (!errorMessage.includes("GOLD") && !errorMessage.includes("token")) {
+        toast({
+          title: "Error fetching balance",
+          description: errorMessage,
+          variant: "destructive"
+        })
+      }
     }
   }, [publicKey, connected, connection, network, toast])
 

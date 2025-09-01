@@ -4,7 +4,6 @@ import type React from "react"
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider"
 import { WalletContextProvider } from "@/components/providers/WalletContextProvider"
-import { WalletConnectionProvider } from "@/components/providers/WalletConnectionProvider"
 import { NetworkContextProvider } from "@/components/providers/NetworkContextProvider"
 import ClientErrorBoundary from "@/components/ClientErrorBoundary"
 
@@ -14,7 +13,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <NetworkContextProvider>
           <WalletContextProvider>
-            <WalletConnectionProvider>{children}</WalletConnectionProvider>
+            {children}
           </WalletContextProvider>
         </NetworkContextProvider>
       </ThemeProvider>

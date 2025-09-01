@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useWalletConnection } from "@/components/providers/WalletConnectionProvider"
-import { X, AlertCircle, ExternalLink, ChevronRight } from "lucide-react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { X, AlertCircle, ExternalLink, ChevronRight, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { detectBrowser } from "@/utils/browser-detection"
+import { detectBrowser, isBrowserSupported } from "@/utils/browser-detection"
+import { isWalletInstalled, getRecommendedWallet, getWalletInstallUrl } from "@/utils/wallet-detection"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ConnectWalletModalProps {
   isOpen: boolean
@@ -13,99 +15,88 @@ interface ConnectWalletModalProps {
 }
 
 export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps) {
-  const { connect, error, retry, clearError, isWalletAvailable, getRecommendedWallet, isBrowserSupported } =
-    useWalletConnection()
+  const { select, connect, connecting, connected, wallets } = useWallet()
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const browserInfo = detectBrowser()
+  const { toast } = useToast()
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
       setSelectedWallet(null)
-      setIsConnecting(false)
-      clearError()
-      // Dispatch event to unlock body scroll
-      document.dispatchEvent(new CustomEvent('wallet-modal-close'))
-    } else {
-      // Dispatch event to lock body scroll
-      document.dispatchEvent(new CustomEvent('wallet-modal-open'))
+      setError(null)
     }
+  }, [isOpen])
 
-    // Cleanup on unmount
-    return () => {
-      if (isOpen) {
-        document.dispatchEvent(new CustomEvent('wallet-modal-close'))
-      }
+  // Close modal when wallet connects
+  useEffect(() => {
+    if (connected && isOpen) {
+      onClose()
+      toast({
+        title: "Wallet Connected",
+        description: "Your wallet has been connected successfully.",
+      })
     }
-  }, [isOpen, clearError])
+  }, [connected, isOpen, onClose, toast])
 
   // Handle wallet selection
   const handleSelectWallet = async (walletName: string) => {
-    setSelectedWallet(walletName)
-    setIsConnecting(true)
+    try {
+      setSelectedWallet(walletName)
+      setError(null)
 
-    const success = await connect(walletName)
+      // Find the wallet adapter
+      const walletAdapter = wallets.find(w => 
+        w.adapter.name.toLowerCase().includes(walletName.toLowerCase())
+      )
 
-    if (success) {
-      onClose()
-    } else {
-      setIsConnecting(false)
+      if (!walletAdapter) {
+        throw new Error(`${walletName} wallet not found`)
+      }
+
+      // Check if wallet is installed
+      if (walletAdapter.adapter.readyState !== 'Installed') {
+        throw new Error(`${walletName} wallet is not installed. Please install it first.`)
+      }
+
+      // Select and connect
+      select(walletAdapter.adapter.name)
+      
+      // Wait a bit for selection to complete
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      await connect()
+    } catch (err: any) {
+      console.error("Wallet connection error:", err)
+      setError(err.message || "Failed to connect wallet")
+      setSelectedWallet(null)
+      
+      toast({
+        title: "Connection Failed",
+        description: err.message || "Failed to connect wallet. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
   // Handle retry
   const handleRetry = async () => {
-    setIsConnecting(true)
-    const success = await retry()
-
-    if (success) {
-      onClose()
-    } else {
-      setIsConnecting(false)
+    if (selectedWallet) {
+      await handleSelectWallet(selectedWallet)
     }
   }
 
-  // Get wallet installation link
-  const getWalletInstallLink = (walletName: string) => {
-    const browser = browserInfo.name.toLowerCase()
 
-    if (walletName.toLowerCase() === "phantom") {
-      if (browser === "chrome")
-        return "https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa"
-      if (browser === "firefox") return "https://addons.mozilla.org/en-US/firefox/addon/phantom-app/"
-      if (browser === "edge")
-        return "https://microsoftedge.microsoft.com/addons/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa"
-      return "https://phantom.app/download"
-    }
 
-    if (walletName.toLowerCase() === "solflare") {
-      if (browser === "chrome")
-        return "https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic"
-      if (browser === "firefox") return "https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet/"
-      if (browser === "edge")
-        return "https://microsoftedge.microsoft.com/addons/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic"
-      return "https://solflare.com/download"
-    }
-
-    return "#"
-  }
-
-  // Wallet options
-  const walletOptions = [
-    {
-      name: "Phantom",
-      icon: "/phantom-icon.png", // You'll need to add this image
-      isAvailable: isWalletAvailable("Phantom"),
-      isRecommended: getRecommendedWallet() === "Phantom",
-    },
-    {
-      name: "Solflare",
-      icon: "/solflare-icon.png", // You'll need to add this image
-      isAvailable: isWalletAvailable("Solflare"),
-      isRecommended: getRecommendedWallet() === "Solflare",
-    },
-  ]
+  // Wallet options based on available adapters
+  const walletOptions = wallets.map(wallet => ({
+    name: wallet.adapter.name,
+    icon: wallet.adapter.icon,
+    isAvailable: wallet.adapter.readyState === 'Installed',
+    isRecommended: wallet.adapter.name.toLowerCase().includes(getRecommendedWallet()?.toLowerCase() || 'phantom'),
+    adapter: wallet.adapter
+  }))
 
   if (!isOpen) return null
 
@@ -135,7 +126,7 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
             {/* Content */}
             <div className="p-4">
               {/* Browser compatibility warning */}
-              {!isBrowserSupported && (
+              {!isBrowserSupported() && (
                 <div className="mb-4 p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg text-amber-400 text-sm">
                   <div className="flex items-start">
                     <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
@@ -156,18 +147,11 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
                   <div className="flex items-start">
                     <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium">{error.message}</p>
-                      <p className="mt-1">{error.details}</p>
-                      {error.recoverySteps && (
-                        <ul className="mt-2 list-disc list-inside">
-                          {error.recoverySteps.map((step, index) => (
-                            <li key={index}>{step}</li>
-                          ))}
-                        </ul>
-                      )}
-                      {error.code === "wallet_not_found" && selectedWallet && (
+                      <p className="font-medium">Connection Error</p>
+                      <p className="mt-1">{error}</p>
+                      {error.includes("not installed") && selectedWallet && (
                         <a
-                          href={getWalletInstallLink(selectedWallet)}
+                          href={getWalletInstallUrl(selectedWallet)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-2 flex items-center text-gold hover:underline"
@@ -187,15 +171,18 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
                   <button
                     key={wallet.name}
                     onClick={() => handleSelectWallet(wallet.name)}
-                    disabled={isConnecting}
+                    disabled={connecting}
                     className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
                       wallet.isAvailable ? "border-gold/30 hover:bg-gold/10" : "border-gray-700 text-gray-500"
                     }`}
                   >
                     <div className="flex items-center">
                       <div className="w-8 h-8 mr-3 rounded-full bg-black/50 flex items-center justify-center overflow-hidden">
-                        {/* Replace with actual wallet icons */}
-                        <span className="text-xs">{wallet.name.charAt(0)}</span>
+                        {wallet.icon ? (
+                          <img src={wallet.icon} alt={wallet.name} className="w-6 h-6" />
+                        ) : (
+                          <Wallet className="w-4 h-4" />
+                        )}
                       </div>
                       <div className="text-left">
                         <div className="font-medium">
@@ -214,10 +201,10 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
               {error && (
                 <Button
                   onClick={handleRetry}
-                  disabled={isConnecting}
+                  disabled={connecting}
                   className="mt-4 w-full bg-gold hover:bg-gold/90 text-black"
                 >
-                  {isConnecting ? "Connecting..." : "Retry Connection"}
+                  {connecting ? "Connecting..." : "Retry Connection"}
                 </Button>
               )}
             </div>

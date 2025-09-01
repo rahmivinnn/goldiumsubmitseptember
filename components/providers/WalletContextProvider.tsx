@@ -10,7 +10,11 @@ import {
   useWallet as useSolanaWallet,
 } from "@solana/wallet-adapter-react"
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
-import { PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter } from "@solana/wallet-adapter-wallets"
+import { 
+  PhantomWalletAdapter, 
+  SolflareWalletAdapter, 
+  TorusWalletAdapter
+} from "@solana/wallet-adapter-wallets"
 import { useToast } from "@/components/ui/use-toast"
 import { useNetwork } from "@/components/providers/NetworkContextProvider"
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
@@ -226,9 +230,20 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
     }
   }, [network])
 
-  // Initialize wallet adapters
+  // Initialize wallet adapters with proper error handling
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter(), new TorusWalletAdapter()],
+    () => {
+      try {
+        return [
+          new PhantomWalletAdapter(),
+          new SolflareWalletAdapter({ network: walletNetwork }),
+          new TorusWalletAdapter(),
+        ]
+      } catch (error) {
+        console.error("Error initializing wallet adapters:", error)
+        return []
+      }
+    },
     [walletNetwork],
   )
 
@@ -240,11 +255,13 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
   }
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider value={value}>{children}</WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <WalletContext.Provider value={value}>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect={false}>
+          <WalletModalProvider>{children}</WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </WalletContext.Provider>
   )
 }
 

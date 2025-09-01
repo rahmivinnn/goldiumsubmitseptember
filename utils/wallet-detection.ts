@@ -22,7 +22,7 @@ declare global {
       on: (event: string, callback: any) => void
       removeAllListeners: () => void
     }
-    backpack?: {
+    torus?: {
       connect: () => Promise<{ publicKey: { toString: () => string } }>
       disconnect: () => Promise<void>
       signMessage: (message: Uint8Array, encoding: string) => Promise<{ signature: Uint8Array }>
@@ -50,10 +50,10 @@ export function isWalletInstalled(walletName: string): boolean {
       return !!window.solana?.isPhantom
     case "solflare":
       return !!window.solflare
+    case "torus":
+      return !!window.torus
     case "metamask":
       return !!window.ethereum?.isMetaMask
-    case "backpack":
-      return !!window.backpack
     default:
       return false
   }
@@ -67,8 +67,8 @@ export function getInstalledWallets(): string[] {
 
   if (isWalletInstalled("phantom")) wallets.push("phantom")
   if (isWalletInstalled("solflare")) wallets.push("solflare")
+  if (isWalletInstalled("torus")) wallets.push("torus")
   if (isWalletInstalled("metamask")) wallets.push("metamask")
-  if (isWalletInstalled("backpack")) wallets.push("backpack")
 
   return wallets
 }
@@ -98,7 +98,7 @@ export function getRecommendedWallet(): string | null {
   }
 
   // Prioritize wallets in this order
-  const priorityOrder = ["phantom", "solflare", "backpack", "metamask"]
+  const priorityOrder = ["phantom", "solflare", "torus", "metamask"]
 
   for (const wallet of priorityOrder) {
     if (installedWallets.includes(wallet)) {
@@ -119,10 +119,10 @@ export function getWalletInstallUrl(walletName: string): string {
       return "https://phantom.app/download"
     case "solflare":
       return "https://solflare.com/download"
+    case "torus":
+      return "https://tor.us/"
     case "metamask":
       return "https://metamask.io/download/"
-    case "backpack":
-      return "https://www.backpack.app/download"
     default:
       return ""
   }
@@ -139,10 +139,10 @@ export function getWalletObject(walletName: string): any | null {
       return window.solana
     case "solflare":
       return window.solflare
+    case "torus":
+      return window.torus
     case "metamask":
       return window.ethereum
-    case "backpack":
-      return window.backpack
     default:
       return null
   }

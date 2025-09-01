@@ -25,13 +25,22 @@ export function ConnectWalletButton({
   size = "default",
   showBalance = true 
 }: ConnectWalletButtonProps) {
-  const { connected, connecting, disconnect } = useWallet()
+  const { connected, connecting, disconnect, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
-  const { balance, refreshBalance, isConnected, walletAddress } = useRealWalletBalance()
+  const { balance, refreshBalance } = useRealWalletBalance()
   const { toast } = useToast()
 
   const handleConnect = () => {
-    setVisible(true)
+    try {
+      setVisible(true)
+    } catch (error) {
+      console.error("Error opening wallet modal:", error)
+      toast({
+        title: "Connection Error",
+        description: "Failed to open wallet selection. Please refresh and try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleDisconnect = async () => {
@@ -52,9 +61,9 @@ export function ConnectWalletButton({
   }
 
   const copyAddress = async () => {
-    if (walletAddress) {
+    if (publicKey) {
       try {
-        await navigator.clipboard.writeText(walletAddress)
+        await navigator.clipboard.writeText(publicKey.toString())
         toast({
           title: "Address Copied",
           description: "Wallet address copied to clipboard."
@@ -71,14 +80,16 @@ export function ConnectWalletButton({
   }
 
   const openInExplorer = () => {
-    if (walletAddress) {
-      window.open(`https://solscan.io/account/${walletAddress}`, '_blank')
+    if (publicKey) {
+      window.open(`https://solscan.io/account/${publicKey.toString()}`, '_blank')
     }
   }
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`
   }
+
+  const walletAddress = publicKey?.toString() || null
 
   const formatBalance = (amount: number) => {
     if (amount === 0) return "0"
@@ -100,7 +111,7 @@ export function ConnectWalletButton({
     )
   }
 
-  if (!connected || !isConnected) {
+  if (!connected) {
     return (
       <Button 
         onClick={handleConnect}
