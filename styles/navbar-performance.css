@@ -1,0 +1,106 @@
+/* Navbar Performance Optimizations */
+
+/* Hardware acceleration for all interactive elements */
+.navbar-optimized {
+  contain: layout style paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize button interactions */
+.navbar-button {
+  contain: layout style;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  transition: transform 0.05s ease-out;
+}
+
+.navbar-button:hover {
+  transform: translateZ(0) scale(1.05);
+}
+
+.navbar-button:active {
+  transform: translateZ(0) scale(0.95);
+}
+
+/* Optimize navigation links */
+.navbar-link {
+  contain: layout style;
+  transform: translateZ(0);
+  will-change: color, background-color;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: color 0.05s ease-out, background-color 0.05s ease-out;
+}
+
+.navbar-link:hover {
+  transform: translateZ(0);
+}
+
+.navbar-link:active {
+  transform: translateZ(0);
+}
+
+/* Optimize mobile menu */
+.mobile-menu {
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Reduce paint operations */
+.navbar-container {
+  contain: layout style;
+  transform: translateZ(0);
+}
+
+/* Optimize logo */
+.navbar-logo {
+  contain: layout style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Critical performance optimizations */
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-optimized * {
+    transition-property: color, background-color, transform;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out;
+  }
+}
+
+/* Disable animations on slow connections */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-optimized * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* GPU layer promotion for critical elements */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+}
+
+/* Optimize text rendering */
+.optimized-text {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* Prevent layout thrashing */
+.layout-stable {
+  contain: layout;
+  min-height: 0;
+  min-width: 0;
+}
