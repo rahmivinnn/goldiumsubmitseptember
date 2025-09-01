@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react"
 import type { Token } from "@/constants/tokens"
-import { useTheme } from "@/components/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
 
 interface QuoteDisplayProps {
   quote: any

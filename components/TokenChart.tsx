@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { getTokenPriceHistory } from "@/utils/jupiter"
 import { Loader2 } from "lucide-react"
-import { useTheme } from "@/components/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface TokenChartProps {

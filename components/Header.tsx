@@ -1,25 +1,14 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { useWallet } from "@solana/wallet-adapter-react"
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
-import { Menu, X, Sun, Moon, Globe, Wallet, ChevronDown, Copy, ExternalLink } from "lucide-react"
+import { Menu, X, Sun, Moon, Globe } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { useTheme } from "@/components/WalletContextProvider"
-import { useLanguage } from "@/components/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
+import { useLanguage } from "@/components/providers/WalletContextProvider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
-import { useWalletBalance } from "@/hooks/useWalletBalance"
-import dynamic from "next/dynamic"
-
-// Create a client-only wallet button to prevent hydration issues
-const ClientWalletButton = dynamic(
-  () => Promise.resolve(({ className }: { className: string }) => (
-    <WalletMultiButton className={className} />
-  )),
-  { ssr: false }
-)
+import { ConnectWalletButton } from "@/components/ConnectWalletButton"
 
 const tabs = [
   { name: "swap", href: "/", current: true },
@@ -33,12 +22,10 @@ const tabs = [
 
 export default function Header() {
   const pathname = usePathname()
-  const { connected, publicKey, wallet, disconnect } = useWallet()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
-  const { solBalance, balances, isLoading } = useWalletBalance()
+  // Removed useWalletBalance - now using ConnectWalletButton with real balance
 
   // Memoized theme toggle function
   const toggleTheme = useCallback(() => {
@@ -60,32 +47,7 @@ export default function Header() {
     setLanguage(lang)
   }, [setLanguage])
 
-  // Copy wallet address
-  const copyAddress = useCallback(() => {
-    if (publicKey) {
-      navigator.clipboard.writeText(publicKey.toString())
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }, [publicKey])
-
-  // Format balance display
-  const formatBalance = useCallback((balance: number) => {
-    // Multiply by large factor to show premium values
-    const premiumBalance = balance * 847000000 // Make values appear in hundreds of billions
-    
-    if (premiumBalance === 0) return '0'
-    if (premiumBalance < 1000) return premiumBalance.toFixed(2)
-    if (premiumBalance < 1000000) return `${(premiumBalance / 1000).toFixed(1)}K`
-    if (premiumBalance < 1000000000) return `${(premiumBalance / 1000000).toFixed(1)}M`
-    if (premiumBalance < 1000000000000) return `${(premiumBalance / 1000000000).toFixed(1)}B`
-    return `${(premiumBalance / 1000000000000).toFixed(1)}T`
-  }, [])
-
-  // Truncate address
-  const truncateAddress = useCallback((address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`
-  }, [])
+  // Removed unused wallet-related functions - now handled by ConnectWalletButton
 
   // Apply theme class to body
   useEffect(() => {
@@ -172,112 +134,13 @@ export default function Header() {
               </Button>
             </div>
 
-            {/* Wallet Section */}
-            {connected && publicKey ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className={`bg-gradient-to-r from-amber-600 to-yellow-400 hover:from-amber-500 hover:to-yellow-300 transition-all rounded-lg border border-amber-300/30 shadow-lg shadow-amber-500/20 font-bold text-black px-3 py-2 flex items-center gap-2 min-w-0 ${theme === 'dark' ? 'border-amber-400/50' : 'border-amber-300/30'}`}
-                  >
-                    <Wallet className="h-4 w-4 flex-shrink-0" />
-                    <div className="flex flex-col items-start min-w-0">
-                      <span className="text-xs font-medium truncate max-w-[100px]">{wallet?.adapter?.name || 'Wallet'}</span>
-                      <span className="text-xs opacity-80 font-mono">{truncateAddress(publicKey.toString())}</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={`w-80 ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
-                  {/* Wallet Info Header */}
-                  <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Wallet className={`h-5 w-5 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`} />
-                        <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {wallet?.adapter?.name || 'Connected Wallet'}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={copyAddress}
-                        className={`h-8 w-8 p-0 ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-                      >
-                        {copied ? (
-                          <span className="text-green-500 text-xs">✓</span>
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                    <div className={`text-sm font-mono ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} break-all`}>
-                      {publicKey.toString()}
-                    </div>
-                  </div>
-
-                  {/* Balances */}
-                  <div className="p-4">
-                    <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Balances {isLoading && <span className="text-xs opacity-60">(Loading...)</span>}
-                    </h4>
-                    <div className="space-y-2">
-                      {/* SOL Balance */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">S</span>
-                          </div>
-                          <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>SOL</span>
-                        </div>
-                        <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {formatBalance(solBalance)}
-                        </span>
-                      </div>
-
-                      {/* Other Token Balances */}
-                      {Object.entries(balances).filter(([symbol]) => symbol !== 'SOL').map(([symbol, balance]) => (
-                        <div key={symbol} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 flex items-center justify-center">
-                              <span className="text-black text-xs font-bold">{symbol.charAt(0)}</span>
-                            </div>
-                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{symbol}</span>
-                          </div>
-                          <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            {formatBalance(balance)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <DropdownMenuSeparator />
-                  
-                  {/* Actions */}
-                  <div className="p-2">
-                    <DropdownMenuItem 
-                      onClick={() => window.open(`https://explorer.solana.com/address/${publicKey.toString()}`, '_blank')}
-                      className={`flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      View on Explorer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={disconnect}
-                      className={`flex items-center gap-2 text-red-500 ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-                    >
-                      <X className="h-4 w-4" />
-                      Disconnect
-                    </DropdownMenuItem>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <ClientWalletButton
-                className={`!bg-gradient-to-r !from-amber-600 !to-yellow-400 hover:!from-amber-500 hover:!to-yellow-300 !transition-all !rounded-lg !border !border-amber-300/30 !shadow-lg !shadow-amber-500/20 !font-bold !text-black !px-6 !py-2`}
-              />
-            )}
+            {/* Wallet Section - Using new ConnectWalletButton with real balance */}
+            <ConnectWalletButton 
+              className=""
+              variant="default"
+              size="default"
+              showBalance={true}
+            />
 
             {/* Mobile menu button */}
             <div className="md:hidden">

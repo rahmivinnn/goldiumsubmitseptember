@@ -1,164 +1,223 @@
-'use client'
+"use client"
 
-import { useWallet } from '@solana/wallet-adapter-react'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-import { useWalletBalance } from '@/components/providers/WalletContextProvider'
-import { getSolBalance, getTokenBalance } from '@/services/tokenService'
-import { useNetwork } from '@/components/providers/NetworkContextProvider'
-import { GOLD_MINT_ADDRESS } from '@/services/tokenService'
+import React from "react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { useWalletModal } from "@solana/wallet-adapter-react-ui"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Wallet, RefreshCw, Copy, ExternalLink } from "lucide-react"
+import { useRealWalletBalance } from "@/hooks/useRealWalletBalance"
+import { useToast } from "@/components/ui/use-toast"
+import { cn } from "@/lib/utils"
 
-// Create a client-only wallet button to prevent hydration issues
-const ClientWalletButton = dynamic(
-  () => Promise.resolve(({ className, children }: { className: string; children?: React.ReactNode }) => (
-    <WalletMultiButton className={className}>
-      {children}
-    </WalletMultiButton>
-  )),
-  { ssr: false }
-)
+interface ConnectWalletButtonProps {
+  className?: string
+  variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary"
+  size?: "default" | "sm" | "lg" | "icon"
+  showBalance?: boolean
+}
 
-export function ConnectWalletButton() {
-  const { connected, publicKey } = useWallet()
-  const { connection, network, isConnectionHealthy } = useNetwork()
-  const [solBalance, setSolBalance] = useState<number>(0)
-  const [goldBalance, setGoldBalance] = useState<number>(0)
-  const [isLoadingBalances, setIsLoadingBalances] = useState(false)
-  const [balanceError, setBalanceError] = useState<string | null>(null)
-  const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null)
+export function ConnectWalletButton({ 
+  className, 
+  variant = "default", 
+  size = "default",
+  showBalance = true 
+}: ConnectWalletButtonProps) {
+  const { connected, connecting, disconnect } = useWallet()
+  const { setVisible } = useWalletModal()
+  const { balance, refreshBalance, isConnected, walletAddress } = useRealWalletBalance()
+  const { toast } = useToast()
 
-  // Fetch real wallet balances
-  const fetchBalances = async () => {
-    if (!publicKey || !connected) {
-      console.log('[fetchBalances] Wallet not connected, clearing balances')
-      setSolBalance(0)
-      setGoldBalance(0)
-      setLastFetchTime(null)
-      return
-    }
-    
-    if (!connection) {
-      console.error('[fetchBalances] No connection available')
-      setBalanceError('No connection available')
-      return
-    }
-    
-    console.log(`[fetchBalances] Starting balance fetch for wallet: ${publicKey.toString()}`)
-    console.log(`[fetchBalances] Network: ${network}, Connection healthy: ${isConnectionHealthy}`)
-    console.log(`[fetchBalances] Connection endpoint: ${connection.rpcEndpoint}`)
-    
-    setIsLoadingBalances(true)
-    setBalanceError(null)
-    
-    let hasAnySuccess = false
-    
+  const handleConnect = () => {
+    setVisible(true)
+  }
+
+  const handleDisconnect = async () => {
     try {
-      // Get SOL balance with retry logic
-      let solBal = 0
-      try {
-        console.log('[fetchBalances] Fetching SOL balance...')
-        solBal = await getSolBalance(connection, publicKey)
-        setSolBalance(solBal)
-        hasAnySuccess = true
-        console.log(`[fetchBalances] SOL balance SUCCESS: ${solBal}`)
-      } catch (solError) {
-        console.error('[fetchBalances] Error fetching SOL balance:', solError)
-        setSolBalance(0)
-        setBalanceError(`SOL fetch failed: ${solError.message}`)
-      }
-      
-      // Get GOLD balance with fallback for different networks
-      let goldBal = 0
-      try {
-        const goldMintAddress = GOLD_MINT_ADDRESS[network] || GOLD_MINT_ADDRESS['mainnet-beta']
-        console.log(`[fetchBalances] Fetching GOLD balance for mint: ${goldMintAddress}`)
-        goldBal = await getTokenBalance(connection, publicKey, goldMintAddress)
-        setGoldBalance(goldBal)
-        hasAnySuccess = true
-        console.log(`[fetchBalances] GOLD balance SUCCESS: ${goldBal}`)
-      } catch (goldError) {
-        console.warn('[fetchBalances] Error fetching GOLD balance:', goldError)
-        // Try with mainnet address as fallback
-        try {
-          console.log('[fetchBalances] Trying GOLD balance with mainnet fallback...')
-          goldBal = await getTokenBalance(connection, publicKey, GOLD_MINT_ADDRESS['mainnet-beta'])
-          setGoldBalance(goldBal)
-          hasAnySuccess = true
-          console.log(`[fetchBalances] GOLD balance (fallback) SUCCESS: ${goldBal}`)
-        } catch (fallbackError) {
-          console.warn('[fetchBalances] Error fetching GOLD balance with fallback:', fallbackError)
-          setGoldBalance(0)
-        }
-      }
-      
-      if (hasAnySuccess) {
-        setLastFetchTime(new Date())
-        console.log('[fetchBalances] Balance fetch completed successfully')
-        // Clear error if we had any success
-        if (balanceError && (solBal > 0 || goldBal > 0)) {
-          setBalanceError(null)
-        }
-      } else {
-        console.error('[fetchBalances] No balances could be fetched')
-        if (!balanceError) {
-          setBalanceError('Unable to fetch any balances')
-        }
-      }
-      
+      await disconnect()
+      toast({
+        title: "Wallet Disconnected",
+        description: "Your wallet has been disconnected successfully."
+      })
     } catch (error) {
-      console.error('[fetchBalances] Unexpected error during balance fetch:', error)
-      setBalanceError(`Fetch error: ${error.message}`)
-      setSolBalance(0)
-      setGoldBalance(0)
-    } finally {
-      setIsLoadingBalances(false)
-      console.log('[fetchBalances] Balance fetch process completed')
+      console.error("Disconnect error:", error)
+      toast({
+        title: "Disconnect Error",
+        description: "Failed to disconnect wallet.",
+        variant: "destructive"
+      })
     }
   }
 
-  useEffect(() => {
-    if (connected && publicKey) {
-      fetchBalances()
-      // Refresh balances every 30 seconds when connected
-      const interval = setInterval(fetchBalances, 30000)
-      return () => clearInterval(interval)
-    } else {
-      setSolBalance(0)
-      setGoldBalance(0)
-      setBalanceError(null)
+  const copyAddress = async () => {
+    if (walletAddress) {
+      try {
+        await navigator.clipboard.writeText(walletAddress)
+        toast({
+          title: "Address Copied",
+          description: "Wallet address copied to clipboard."
+        })
+      } catch (error) {
+        console.error("Copy error:", error)
+        toast({
+          title: "Copy Failed",
+          description: "Failed to copy address to clipboard.",
+          variant: "destructive"
+        })
+      }
     }
-  }, [connected, publicKey, network])
+  }
+
+  const openInExplorer = () => {
+    if (walletAddress) {
+      window.open(`https://solscan.io/account/${walletAddress}`, '_blank')
+    }
+  }
+
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 4)}...${address.slice(-4)}`
+  }
+
+  const formatBalance = (amount: number) => {
+    if (amount === 0) return "0"
+    if (amount < 0.001) return "< 0.001"
+    return amount.toFixed(3)
+  }
+
+  if (connecting) {
+    return (
+      <Button 
+        disabled 
+        variant={variant} 
+        size={size}
+        className={cn("gap-2", className)}
+      >
+        <RefreshCw className="h-4 w-4 animate-spin" />
+        Connecting...
+      </Button>
+    )
+  }
+
+  if (!connected || !isConnected) {
+    return (
+      <Button 
+        onClick={handleConnect}
+        variant={variant} 
+        size={size}
+        className={cn("gap-2", className)}
+      >
+        <Wallet className="h-4 w-4" />
+        Connect Wallet
+      </Button>
+    )
+  }
+
+  if (!showBalance) {
+    return (
+      <Button 
+        onClick={handleDisconnect}
+        variant={variant} 
+        size={size}
+        className={cn("gap-2", className)}
+      >
+        <Wallet className="h-4 w-4" />
+        {walletAddress ? formatAddress(walletAddress) : "Connected"}
+      </Button>
+    )
+  }
 
   return (
-    <div className="flex items-center relative">
-      <ClientWalletButton className="!bg-gradient-to-r !from-yellow-400 !via-yellow-500 !to-amber-600 !text-black !font-bold !px-8 !py-3 !rounded-xl !shadow-xl !shadow-yellow-500/20 hover:!from-yellow-300 hover:!via-yellow-400 hover:!to-amber-500 hover:!shadow-yellow-400/30 !transition-all !duration-100 !transform hover:!scale-102 !border-2 !border-yellow-300/50 hover:!border-yellow-200 !z-50">
-        {connected && publicKey && (
-          <div className="flex flex-col items-start ml-2">
-            <div className="text-xs opacity-80">
-              SOL: {isLoadingBalances ? '...' : balanceError ? 'Error' : solBalance.toFixed(4)}
+    <Card className="w-auto">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Wallet Address */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-green-500" />
+              <span className="text-sm font-medium">
+                {walletAddress ? formatAddress(walletAddress) : "Connected"}
+              </span>
             </div>
-            <div className="text-xs opacity-80">
-              GOLD: {isLoadingBalances ? '...' : balanceError ? 'Error' : goldBalance.toFixed(2)}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={copyAddress}
+                title="Copy Address"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={openInExplorer}
+                title="View in Explorer"
+              >
+                <ExternalLink className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={refreshBalance}
+                disabled={balance.isLoading}
+                title="Refresh Balance"
+              >
+                <RefreshCw className={cn("h-3 w-3", balance.isLoading && "animate-spin")} />
+              </Button>
             </div>
-            <div className="text-xs opacity-60 flex items-center gap-1">
-              <div className={`w-2 h-2 rounded-full ${isConnectionHealthy ? 'bg-green-400' : 'bg-red-400'}`}></div>
-              {network}
-            </div>
-            {balanceError && (
-              <div className="text-xs text-red-400 opacity-60">
-                {balanceError}
-              </div>
-            )}
-            {lastFetchTime && (
-              <div className="text-xs opacity-40">
-                Last: {lastFetchTime.toLocaleTimeString()}
-              </div>
-            )}
           </div>
-        )}
-      </ClientWalletButton>
-    </div>
+
+          <Separator />
+
+          {/* Balances */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">SOL Balance:</span>
+              <Badge variant="secondary" className="font-mono">
+                {balance.isLoading ? "Loading..." : `${formatBalance(balance.sol)} SOL`}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">GOLD Balance:</span>
+              <Badge variant="outline" className="font-mono">
+                {balance.isLoading ? "Loading..." : `${formatBalance(balance.gold)} GOLD`}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Error Display */}
+          {balance.error && (
+            <div className="text-xs text-red-500 bg-red-50 p-2 rounded">
+              Error: {balance.error}
+            </div>
+          )}
+
+          {/* Last Updated */}
+          {balance.lastUpdated && (
+            <div className="text-xs text-muted-foreground text-center">
+              Updated: {balance.lastUpdated.toLocaleTimeString()}
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Disconnect Button */}
+          <Button 
+            onClick={handleDisconnect}
+            variant="outline" 
+            size="sm"
+            className="w-full"
+          >
+            Disconnect
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

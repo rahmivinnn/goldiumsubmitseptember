@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { getLiquidityPools } from "@/utils/jupiter"
 import { Loader2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react"
-import { useTheme } from "@/components/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 

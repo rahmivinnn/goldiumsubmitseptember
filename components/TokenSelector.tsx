@@ -6,7 +6,7 @@ import { ChevronDown, Search } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { AVAILABLE_TOKENS, type Token } from "@/constants/tokens"
-import { useTheme } from "@/components/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
 
 interface TokenSelectorProps {
   selectedToken: Token

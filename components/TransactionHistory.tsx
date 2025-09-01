@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useTransactions } from "@/components/WalletContextProvider"
-import { useTheme } from "@/components/WalletContextProvider"
-import { useLanguage } from "@/components/WalletContextProvider"
+import { useTransactions } from "@/components/providers/WalletContextProvider"
+import { useTheme } from "@/components/providers/WalletContextProvider"
+import { useLanguage } from "@/components/providers/WalletContextProvider"
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle2, XCircle, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
