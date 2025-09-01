@@ -217,16 +217,19 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
     }
   }, [network])
 
-  // Generate RPC endpoint based on network
+  // Generate RPC endpoint based on network with reliable endpoints
   const endpoint = useMemo(() => {
     switch (network) {
       case "mainnet-beta":
-        return "https://api.mainnet-beta.solana.com"
+        // Use reliable mainnet RPC endpoints
+        return process.env.NEXT_PUBLIC_MAINNET_RPC || "https://rpc.ankr.com/solana"
       case "testnet":
-        return "https://api.testnet.solana.com"
+        // Use reliable testnet RPC endpoints
+        return process.env.NEXT_PUBLIC_TESTNET_RPC || "https://rpc.ankr.com/solana_testnet"
       case "devnet":
       default:
-        return "https://api.devnet.solana.com"
+        // Use reliable devnet RPC endpoints
+        return process.env.NEXT_PUBLIC_DEVNET_RPC || "https://rpc.ankr.com/solana_devnet"
     }
   }, [network])
 

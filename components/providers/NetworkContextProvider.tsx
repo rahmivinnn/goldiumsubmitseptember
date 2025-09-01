@@ -40,29 +40,35 @@ export function NetworkContextProvider({ children, defaultNetwork = "mainnet-bet
   const [isConnectionHealthy, setIsConnectionHealthy] = useState(true)
   const [connection, setConnection] = useState<Connection | null>(null)
 
-  // Get the RPC URL for the current network
+  // Get the RPC URL for the current network - Updated with reliable endpoints
   const getRpcUrl = useCallback((network: NetworkType): string => {
     const rpcUrls = {
-      'mainnet-beta': process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
-      'testnet': 'https://api.testnet.solana.com',
-      'devnet': 'https://api.devnet.solana.com'
+      'mainnet-beta': process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://rpc.ankr.com/solana',
+      'testnet': 'https://rpc.ankr.com/solana_testnet',
+      'devnet': 'https://rpc.ankr.com/solana_devnet'
     }
     return rpcUrls[network]
   }, [])
 
-  // Fallback RPC URLs for better reliability
+  // Fallback RPC URLs for better reliability - Updated with working endpoints
   const getFallbackRpcUrls = useCallback((network: NetworkType): string[] => {
     const fallbackUrls = {
       'mainnet-beta': [
-        'https://api.mainnet-beta.solana.com',
         'https://rpc.ankr.com/solana',
-        'https://solana-api.projectserum.com',
-        'https://mainnet.helius-rpc.com/?api-key=demo'
+        'https://solana-mainnet.g.alchemy.com/v2/demo',
+        'https://rpc.helius.xyz/?api-key=demo',
+        'https://mainnet.helius-rpc.com/?api-key=demo',
+        'https://api.mainnet-beta.solana.com',
+        'https://solana-api.projectserum.com'
       ],
       'testnet': [
+        'https://rpc.ankr.com/solana_testnet',
         'https://api.testnet.solana.com'
       ],
       'devnet': [
+        'https://rpc.ankr.com/solana_devnet',
+        'https://solana-devnet.g.alchemy.com/v2/demo',
+        'https://rpc.helius.xyz/?api-key=demo&cluster=devnet',
         'https://api.devnet.solana.com'
       ]
     }

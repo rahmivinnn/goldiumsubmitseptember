@@ -53,28 +53,47 @@ export function useRealWalletBalance() {
     setBalance(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      // Fetch SOL balance with timeout and retry logic
+      // Fetch SOL balance with multiple RPC fallbacks
       console.log("💰 Fetching SOL balance...")
       let solBalance = 0
       
-      try {
-        const solBalanceInLamports = await Promise.race([
-          connection.getBalance(publicKey, 'confirmed'),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('SOL balance fetch timeout')), 10000)
-          )
-        ])
-        solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
-        console.log("✅ SOL Balance:", solBalance)
-      } catch (solError) {
-        console.log("⚠️ SOL balance fetch failed, trying with 'processed' commitment:", solError)
+      const fallbackRPCs = [
+        connection,
+        new Connection("https://rpc.ankr.com/solana", { commitment: 'confirmed' }),
+        new Connection("https://solana-mainnet.g.alchemy.com/v2/demo", { commitment: 'confirmed' }),
+        new Connection("https://rpc.helius.xyz/?api-key=demo", { commitment: 'confirmed' })
+      ]
+      
+      let lastError = null
+      for (let i = 0; i < fallbackRPCs.length; i++) {
         try {
-          const solBalanceInLamports = await connection.getBalance(publicKey, 'processed')
+          console.log(`🔄 Trying RPC ${i + 1}/${fallbackRPCs.length}: ${fallbackRPCs[i].rpcEndpoint}`)
+          const solBalanceInLamports = await Promise.race([
+            fallbackRPCs[i].getBalance(publicKey, 'confirmed'),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('SOL balance fetch timeout')), 8000)
+            )
+          ])
           solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
-          console.log("✅ SOL Balance (processed):", solBalance)
-        } catch (fallbackError) {
-          console.error("❌ SOL balance fetch failed completely:", fallbackError)
-          throw new Error("Failed to fetch SOL balance")
+          console.log("✅ SOL Balance:", solBalance)
+          break // Success, exit loop
+        } catch (solError) {
+          lastError = solError
+          console.log(`⚠️ RPC ${i + 1} failed:`, solError)
+          
+          // If this is the last RPC, try with processed commitment
+          if (i === fallbackRPCs.length - 1) {
+            try {
+              console.log("🔄 Final attempt with 'processed' commitment...")
+              const solBalanceInLamports = await fallbackRPCs[0].getBalance(publicKey, 'processed')
+              solBalance = solBalanceInLamports / LAMPORTS_PER_SOL
+              console.log("✅ SOL Balance (processed):", solBalance)
+              break
+            } catch (finalError) {
+              console.error("❌ All SOL balance fetch attempts failed:", finalError)
+              throw new Error(`Failed to fetch SOL balance: ${lastError?.message || 'Unknown error'}`)
+            }
+          }
         }
       }
 
@@ -99,22 +118,45 @@ export function useRealWalletBalance() {
           )
           console.log("🔍 Associated Token Account:", associatedTokenAccount.toString())
           
-          // Check if the account exists with timeout
-          const accountInfo = await Promise.race([
-            connection.getAccountInfo(associatedTokenAccount, 'confirmed'),
-            new Promise<null>((_, reject) => 
-              setTimeout(() => reject(new Error('Token account fetch timeout')), 5000)
-            )
-          ])
+          // Check if the account exists with timeout and fallback RPCs
+          let accountInfo = null
+          for (let i = 0; i < fallbackRPCs.length; i++) {
+            try {
+              console.log(`🔄 Trying RPC ${i + 1} for token account...`)
+              accountInfo = await Promise.race([
+                fallbackRPCs[i].getAccountInfo(associatedTokenAccount, 'confirmed'),
+                new Promise<null>((_, reject) => 
+                  setTimeout(() => reject(new Error('Token account fetch timeout')), 5000)
+                )
+              ])
+              break // Success, exit loop
+            } catch (tokenError) {
+              console.log(`⚠️ Token account RPC ${i + 1} failed:`, tokenError)
+              if (i === fallbackRPCs.length - 1) {
+                console.log("⚠️ All token account fetch attempts failed, setting balance to 0")
+                accountInfo = null
+                break
+              }
+            }
+          }
           
           if (accountInfo && accountInfo.data.length > 0) {
-            try {
-              const account = await getAccount(connection, associatedTokenAccount)
-              goldBalance = Number(account.amount) / Math.pow(10, 9) // GOLD has 9 decimals
-              console.log("✅ GOLD Balance:", goldBalance)
-            } catch (parseError) {
-              console.log("⚠️ Failed to parse token account:", parseError)
-              goldBalance = 0
+            // Try to parse token account with fallback RPCs
+            let accountParsed = false
+            for (let i = 0; i < fallbackRPCs.length && !accountParsed; i++) {
+              try {
+                console.log(`🔄 Trying to parse token account with RPC ${i + 1}...`)
+                const account = await getAccount(fallbackRPCs[i], associatedTokenAccount)
+                goldBalance = Number(account.amount) / Math.pow(10, 9) // GOLD has 9 decimals
+                console.log("✅ GOLD Balance:", goldBalance)
+                accountParsed = true
+              } catch (parseError) {
+                console.log(`⚠️ Token account parsing failed with RPC ${i + 1}:`, parseError)
+                if (i === fallbackRPCs.length - 1) {
+                  console.log("⚠️ All token account parsing attempts failed, setting balance to 0")
+                  goldBalance = 0
+                }
+              }
             }
           } else {
             console.log("ℹ️ No GOLD token account found or account is empty")
