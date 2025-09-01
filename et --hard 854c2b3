@@ -1,0 +1,3 @@
+[33m2c5b2a6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix wallet connection and implement real balance display
+[33m854c2b3[m feat: Add Solana DeFi Dashboard and update splash screen colors
+[33mac4b32a[m Initial commit: Goldium DeFi application with wallet integration and balance fixes

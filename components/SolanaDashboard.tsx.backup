@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
-// import { useJupiter } from "@jup-ag/react-hook";
+import { useJupiter } from "@jup-ag/react-hook";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 // Multiple RPC endpoints for better reliability
@@ -142,11 +142,11 @@ export default function SolanaDashboard({ wallet: propWallet }: SolanaDashboardP
   };
 
   // 🔹 Swap via Jupiter
-  // const { exchange } = useJupiter({
-  //   connection,
-  //   cluster: "mainnet-beta",
-  //   userPublicKey: wallet?.publicKey,
-  // });
+  const { exchange } = useJupiter({
+    connection,
+    cluster: "mainnet-beta",
+    userPublicKey: wallet?.publicKey,
+  });
 
   const swapSOLtoGOLD = async (amount: number) => {
     if (!wallet?.publicKey) {
@@ -154,7 +154,7 @@ export default function SolanaDashboard({ wallet: propWallet }: SolanaDashboardP
       return;
     }
 
-    if (true) { // if (!exchange) {
+    if (!exchange) {
       setError("Jupiter exchange not available");
       return;
     }
@@ -164,23 +164,24 @@ export default function SolanaDashboard({ wallet: propWallet }: SolanaDashboardP
       setError(null);
       setTxLink(null);
 
-      // const res = await exchange({
-      //   amount: amount * LAMPORTS_PER_SOL,
-      //   inputMint: PublicKey.default, // SOL
-      //   outputMint: GOLD_MINT,
-      //   slippage: 1,
-      // });
+      const res = await exchange({
+        amount: amount * LAMPORTS_PER_SOL,
+        inputMint: PublicKey.default, // SOL
+        outputMint: GOLD_MINT,
+        slippage: 1,
+      });
 
-      // Simulate successful transaction for demo
-      const mockTxId = "demo_transaction_" + Date.now();
-      console.log("Swap transaction signature:", mockTxId);
-      setTxLink(`https://solscan.io/tx/${mockTxId}`);
-      
-      // Refresh balances after transaction
-      setTimeout(() => {
-        loadBalances();
-      }, 2000);
-      
+      if (res?.txid) {
+        console.log("Swap transaction signature:", res.txid);
+        setTxLink(`https://solscan.io/tx/${res.txid}`);
+        
+        // Refresh balances after transaction
+        setTimeout(() => {
+          loadBalances();
+        }, 2000);
+      } else {
+        setError("Swap failed - no transaction ID returned");
+      }
     } catch (err) {
       console.error("Error swapping SOL to GOLD:", err);
       setError(`Failed to swap: ${err instanceof Error ? err.message : 'Unknown error'}`);

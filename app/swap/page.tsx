@@ -3,7 +3,7 @@ import SwapCard from "@/components/SwapCard"
 import TokenChart from "@/components/TokenChart"
 import LiquidityPoolsList from "@/components/LiquidityPoolsList"
 import TransactionHistory from "@/components/TransactionHistory"
-import { WalletContextProvider } from "@/components/WalletContextProvider"
+import { WalletContextProvider } from "@/components/providers/WalletContextProvider"
 import { SOL_TOKEN, GOLD_TOKEN } from "@/constants/tokens"
 
 export default function SwapPage() {
