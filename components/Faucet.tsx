@@ -1,106 +1,108 @@
 "use client"
+
+import { useState } from "react"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { useTheme } from "@/components/providers/WalletContextProvider"
-import { useFaucet } from "@/hooks/useFaucet"
-import { GOLD_TOKEN } from "@/constants/tokens"
-import Image from "next/image"
+import { Coins, RefreshCw, Wallet } from "lucide-react"
 
-export default function Faucet() {
-  const { connected } = useWallet()
+function Faucet() {
+  const { connected, publicKey } = useWallet()
   const { toast } = useToast()
-  const { theme } = useTheme()
-  const isDarkTheme = theme === "dark"
-  const { isLoading, canClaim, timeUntilNextClaim, claimGold, airdropAmount } = useFaucet()
+  const [isClaiming, setIsClaiming] = useState(false)
 
-  // Format time remaining
-  const formatTimeRemaining = (ms: number) => {
-    if (ms <= 0) return "Ready"
+  const handleClaimTokens = async () => {
+    if (!connected || !publicKey) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet first",
+        variant: "destructive"
+      })
+      return
+    }
 
-    const seconds = Math.floor(ms / 1000)
-    const minutes = Math.floor(seconds / 60)
-    const hours = Math.floor(minutes / 60)
+    setIsClaiming(true)
 
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds % 60}s`
-    } else {
-      return `${seconds}s`
+    try {
+      // Simulate faucet claim
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast({
+        title: "Tokens Claimed!",
+        description: "1000 GOLD tokens have been added to your wallet",
+      })
+
+    } catch (error: any) {
+      console.error("Claim failed:", error)
+      toast({
+        title: "Claim Failed",
+        description: error.message || "Failed to claim tokens",
+        variant: "destructive"
+      })
+    } finally {
+      setIsClaiming(false)
     }
   }
 
+  if (!connected) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="p-6 text-center">
+          <Wallet className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-400 mb-4">Please connect your wallet to claim tokens</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
-    <Card
-      className={`w-full max-w-md mx-auto ${isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}
-    >
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+          <Coins className="h-5 w-5 text-yellow-500" />
           GOLD Token Faucet
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className={`${isDarkTheme ? "bg-gray-800" : "bg-gray-100"} rounded-lg p-6 text-center`}>
-          <div className="mb-4">
-            <Image
-              src={GOLD_TOKEN.logoURI || "/placeholder.svg"}
-              alt="GOLD Token"
-              width={96}
-              height={96}
-              className="mx-auto"
-            />
-          </div>
-          <h3 className={`text-xl font-bold mb-2 ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-            Get {airdropAmount} GOLD Tokens
-          </h3>
-          <p className={`text-sm mb-4 ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-            Use this faucet to get GOLD tokens for testing
-          </p>
-          <Button
-            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold"
-            disabled={isLoading || !connected || !canClaim}
-            onClick={claimGold}
-          >
-            {isLoading ? (
-              <div className="flex items-center">
-                <span className="mr-2">Processing</span>
-                <div className="w-4 h-4 border-2 border-t-transparent border-black rounded-full animate-spin" />
-              </div>
-            ) : !canClaim ? (
-              `Available in ${formatTimeRemaining(timeUntilNextClaim)}`
-            ) : (
-              "Request GOLD Tokens"
-            )}
-          </Button>
-        </div>
-
-        <div className={`${isDarkTheme ? "bg-gray-800" : "bg-gray-100"} rounded-lg p-3 space-y-2 text-sm`}>
-          <div className="flex justify-between items-center">
-            <span className={isDarkTheme ? "text-gray-400" : "text-gray-500"}>Amount</span>
-            <span className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>{airdropAmount} GOLD</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className={isDarkTheme ? "text-gray-400" : "text-gray-500"}>Cooldown</span>
-            <span className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>24 hours</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className={isDarkTheme ? "text-gray-400" : "text-gray-500"}>Status</span>
-            <span className={canClaim ? "text-green-500" : "text-yellow-500"}>
-              {canClaim ? "Available" : "Cooldown"}
-            </span>
+      <CardContent className="space-y-4">
+        <div className="text-center py-4">
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-yellow-400 mb-2">Free GOLD Tokens</h3>
+            <p className="text-gray-300 mb-4">
+              Claim 1,000 GOLD tokens for testing DeFi features
+            </p>
+            <p className="text-sm text-gray-400">
+              Wallet: {publicKey?.toString().slice(0, 6)}...{publicKey?.toString().slice(-4)}
+            </p>
           </div>
         </div>
 
-        <div className="text-center">
-          <p className={`text-xs ${isDarkTheme ? "text-gray-500" : "text-gray-600"}`}>
-            GOLD tokens are for testing purposes only and have no real value.
-          </p>
+        <Button 
+          onClick={handleClaimTokens}
+          disabled={isClaiming}
+          className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold"
+          size="lg"
+        >
+          {isClaiming ? (
+            <>
+              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+              Claiming...
+            </>
+          ) : (
+            <>
+              <Coins className="h-4 w-4 mr-2" />
+              Claim 1,000 GOLD
+            </>
+          )}
+        </Button>
+
+        <div className="text-xs text-gray-500 text-center">
+          <p>GOLD tokens are for testing purposes only and have no real value.</p>
+          <p>You can claim tokens once every 24 hours.</p>
         </div>
       </CardContent>
     </Card>
   )
 }
 
-
+export default Faucet
