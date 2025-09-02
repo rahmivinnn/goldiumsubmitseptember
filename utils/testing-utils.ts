@@ -328,7 +328,8 @@ export async function testBridge(
   }
 }
 
-// Test faucet functionality
+// Faucet functionality removed
+/*
 export async function testFaucet(
   publicKey: string,
   network: string,
@@ -381,6 +382,7 @@ export async function testFaucet(
     }
   }
 }
+*/
 
 // Initialize test environment
 export function initializeTestEnvironment(publicKey: string): void {

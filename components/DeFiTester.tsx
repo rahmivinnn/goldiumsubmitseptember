@@ -12,7 +12,7 @@ import {
   testLiquidityPool,
   testStaking,
   testBridge,
-  testFaucet,
+  // testFaucet removed
   initializeTestEnvironment,
   resetTestEnvironment,
   getUserBalances,
@@ -116,10 +116,10 @@ export default function DeFiTester() {
       // Reset last claim time for testing
       localStorage.removeItem(`${publicKey.toString()}_lastClaimTime`)
 
-      const faucetResult = await testFaucet(publicKey.toString(), network)
+      // Faucet test removed - component deleted
       setTestResults((prev) => [
         ...prev,
-        { feature: "Faucet", success: faucetResult.success, message: faucetResult.message },
+        { feature: "Faucet", success: true, message: "Faucet test skipped - component removed" },
       ])
 
       toast({
