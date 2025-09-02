@@ -1,57 +1,56 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: {
-    unoptimized: true,
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
-  webpack: (config, { isServer }) => {
-    // Fix for pino-pretty
-    if (isServer) {
-      config.externals.push('pino-pretty');
+  webpack: (config, { isServer, dev }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+      }
     }
     
-    // Fix Watchpack errors by ignoring system files
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: [
-        '**/node_modules/**',
-        '**/.git/**',
-        '**/pagefile.sys',
-        '**/hiberfil.sys',
-        '**/swapfile.sys',
-        'C:/pagefile.sys',
-        'C:/hiberfil.sys',
-        'C:/swapfile.sys',
-      ],
-    };
+    // Ignore problematic modules during build
+    config.externals = config.externals || []
+    config.externals.push({
+      'utf-8-validate': 'commonjs utf-8-validate',
+      'bufferutil': 'commonjs bufferutil',
+    })
     
-    // Fix bigint issues with expo/react-native dependencies
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      crypto: false,
-    };
-    
-    // Ignore expo and react-native modules that cause bigint issues
-    config.externals = [
-      ...config.externals,
-      {
-        'react-native': 'react-native',
-        'expo': 'expo',
-        '@expo/env': '@expo/env',
-      },
-    ];
-    
-    return config;
+    return config
   },
+  
+  // Production optimizations
+  compress: true,
+  poweredByHeader: false,
+  
+  // Optimize images
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+  },
+  
+  // Disable source maps in production for faster builds
+  productionBrowserSourceMaps: false,
 }
 
-export default nextConfig;
+export default nextConfig
