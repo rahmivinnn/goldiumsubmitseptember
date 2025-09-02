@@ -80,14 +80,14 @@ export default function DeFiPage() {
 
   return (
     <PageLayout>
-      <div className="container mx-auto max-w-7xl space-y-6">
+      <div className="container mx-auto max-w-5xl space-y-4 px-2">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
             DeFi Hub
           </h1>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Swap tokens, transfer assets, stake for rewards, and provide liquidity with real-time features
+          <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto">
+            Swap tokens, transfer assets, stake for rewards with real blockchain tracking
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function DeFiPage() {
         </motion.div>
 
         {/* Real-time Analytics Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
           {/* SOL Balance Card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -188,15 +188,12 @@ export default function DeFiPage() {
             transition={{ delay: 0.1 }}
           >
             <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">SOL Balance</p>
-                    <p className="text-2xl font-bold text-blue-400">
-                      {connected ? formatBalance(solBalance) : '0.0000'}
-                    </p>
-                  </div>
-                  <img src="/solana-logo.png" alt="SOL" className="h-8 w-8" />
+              <CardContent className="p-3">
+                <div className="text-center">
+                  <p className="text-xs text-gray-400">SOL Balance</p>
+                  <p className="text-lg md:text-xl font-bold text-blue-400">
+                    {connected ? formatBalance(solBalance) : '0.0000'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -209,15 +206,12 @@ export default function DeFiPage() {
             transition={{ delay: 0.2 }}
           >
             <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">GOLD Balance</p>
-                    <p className="text-2xl font-bold text-yellow-400">
-                      {connected ? formatBalance(balances[GOLD_TOKEN.symbol] || 0) : '0.0000'}
-                    </p>
-                  </div>
-                  <Coins className="h-8 w-8 text-yellow-400" />
+              <CardContent className="p-3">
+                <div className="text-center">
+                  <p className="text-xs text-gray-400">GOLD Balance</p>
+                  <p className="text-lg md:text-xl font-bold text-yellow-400">
+                    {connected ? formatBalance(balances[GOLD_TOKEN.symbol] || 0) : '0.0000'}
+                  </p>
                 </div>
               </CardContent>
             </Card>

@@ -62,13 +62,13 @@ export default function TrackingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="container mx-auto px-2 py-4">
+      <div className="max-w-4xl mx-auto space-y-4">
         
         {/* Header */}
         <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">
+            <CardTitle className="text-xl md:text-2xl font-bold text-center">
               🔍 GOLDIUM Transaction Tracker
             </CardTitle>
             <p className="text-center text-gray-300">
@@ -79,13 +79,13 @@ export default function TrackingPage() {
 
         {/* Contract Address Info */}
         <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-xl font-semibold text-yellow-400">GOLD Token Contract Address</h3>
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="font-mono text-lg break-all text-yellow-300">{GOLD_CONTRACT_ADDRESS}</p>
+          <CardContent className="p-4">
+            <div className="text-center space-y-3">
+              <h3 className="text-lg font-semibold text-yellow-400">GOLD Token Contract Address</h3>
+              <div className="bg-black/40 p-3 rounded-lg">
+                <p className="font-mono text-sm break-all text-yellow-300">{GOLD_CONTRACT_ADDRESS}</p>
               </div>
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center gap-2 flex-wrap">
                 <Button 
                   onClick={() => copyToClipboard(GOLD_CONTRACT_ADDRESS, "Contract Address")}
                   variant="outline"

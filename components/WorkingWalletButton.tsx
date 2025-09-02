@@ -201,9 +201,9 @@ export function WorkingWalletButton({ className, showBalance = true }: WorkingWa
   }
 
   return (
-    <Card className="bg-gradient-to-br from-black/80 to-gray-900/80 border-green-500/30">
-      <CardContent className="p-4">
-        <div className="space-y-3">
+    <Card className="wallet-component responsive-card bg-gradient-to-br from-black/80 to-gray-900/80 border-green-500/30 w-full max-w-sm">
+      <CardContent className="p-3">
+        <div className="space-y-2">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

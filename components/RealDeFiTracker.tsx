@@ -478,14 +478,14 @@ export function RealDeFiTracker() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="responsive-container defi-component w-full max-w-4xl mx-auto space-y-4">
       {/* Contract Address Display */}
       <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-yellow-400 mb-1">GOLD Token Contract Address</h3>
-              <p className="font-mono text-sm text-gray-300 break-all">{GOLD_CONTRACT_ADDRESS}</p>
+              <h3 className="responsive-title font-semibold text-yellow-400 mb-1">GOLD Token Contract Address</h3>
+              <p className="contract-address font-mono text-gray-300">{GOLD_CONTRACT_ADDRESS}</p>
             </div>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={copyContractAddress}>
@@ -505,7 +505,7 @@ export function RealDeFiTracker() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="responsive-grid">
         {/* DeFi Actions */}
         <Card>
           <CardHeader>
@@ -650,7 +650,7 @@ export function RealDeFiTracker() {
             <p className="text-sm text-gray-400">All transactions are trackable on Solscan</p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-80 overflow-y-auto">
               {transactions.length === 0 ? (
                 <p className="text-gray-400 text-center py-8">No transactions yet</p>
               ) : (

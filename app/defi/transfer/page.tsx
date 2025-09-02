@@ -88,11 +88,11 @@ export default function TransferPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="responsive-container">
+      <div className="max-w-xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">REAL SOL Transfer</CardTitle>
+            <CardTitle className="responsive-title font-bold text-center">REAL SOL Transfer</CardTitle>
             <CardDescription className="text-center">
               Send SOL to any Solana wallet address - REAL BLOCKCHAIN TRANSACTIONS
             </CardDescription>
