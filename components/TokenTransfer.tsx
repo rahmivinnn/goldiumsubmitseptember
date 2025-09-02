@@ -647,5 +647,4 @@ export default function TokenTransfer() {
   )
 }
 
-export { TokenTransfer }
-export default TokenTransfer
+// Export already done in function declaration

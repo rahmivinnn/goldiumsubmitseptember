@@ -103,5 +103,4 @@ export default function Faucet() {
   )
 }
 
-export { Faucet }
-export default Faucet
+
